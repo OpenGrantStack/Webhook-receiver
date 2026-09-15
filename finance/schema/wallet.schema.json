@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wallet",
+  "type": "object",
+  "required": ["id", "ownerId", "type", "currency"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^wal_[a-z0-9]{14}$" },
+    "ownerId": { "type": "string", "description": "Account or organization ID" },
+    "type": {
+      "type": "string",
+      "enum": ["custodial", "non-custodial", "smart-contract", "escrow", "treasury", "virtual"]
+    },
+    "provider": {
+      "type": "string",
+      "enum": ["stripe", "coinbase-cdp", "moonpay", "safe", "gnosis-safe", "internal", "circle", "request-network"]
+    },
+    "address": { "type": "string", "description": "On-chain address if applicable" },
+    "chain": { "type": "string", "description": "Blockchain network (ethereum, stellar, base, etc.)" },
+    "currency": { "type": "string", "default": "USD" },
+    "balance": {
+      "type": "object",
+      "properties": {
+        "available": { "type": "number", "minimum": 0 },
+        "pending": { "type": "number", "minimum": 0 },
+        "reserved": { "type": "number", "minimum": 0 },
+        "total": { "type": "number", "minimum": 0 }
+      }
+    },
+    "signers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["accountId", "role"],
+        "properties": {
+          "accountId": { "type": "string" },
+          "role": { "type": "string", "enum": ["maker", "approver", "auditor", "admin"] },
+          "weight": { "type": "number", "default": 1 }
+        }
+      }
+    },
+    "quorum": { "type": "number", "description": "M in M-of-N multi-sig" },
+    "status": { "type": "string", "enum": ["active", "frozen", "closed", "pending"], "default": "active" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object" }
+  }
+}
