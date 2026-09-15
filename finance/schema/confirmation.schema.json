@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Confirmation",
+  "type": "object",
+  "required": ["id", "transactionId", "status", "source"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^cnf_[a-z0-9]{14}$" },
+    "transactionId": { "type": "string" },
+    "status": { "type": "string", "enum": ["PENDING", "CONFIRMED", "DECLINED", "TIMEOUT", "REORGED"] },
+    "source": {
+      "type": "string",
+      "enum": ["webhook", "polling", "on-chain", "manual", "reconciliation"]
+    },
+    "providerRef": { "type": "string" },
+    "blockNumber": { "type": "number" },
+    "blockHash": { "type": "string" },
+    "confirmations": { "type": "number" },
+    "requiredConfirmations": { "type": "number" },
+    "payloadId": { "type": "string", "description": "ID of the webhook payload that triggered this" },
+    "confirmedAt": { "type": "string", "format": "date-time" },
+    "declinedAt": { "type": "string", "format": "date-time" },
+    "declineCode": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
