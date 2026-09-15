@@ -1,0 +1,54 @@
+{
+  "id": "payment-lifecycle",
+  "initial": "CREATED",
+  "terminal": ["SETTLED", "VOIDED", "REFUNDED", "EXPIRED"],
+  "states": {
+    "CREATED": {
+      "description": "Payment intent created, awaiting method selection.",
+      "transitions": {
+        "submit": { "to": "PENDING", "requires": ["method"] },
+        "void": { "to": "VOIDED" },
+        "expire": { "to": "EXPIRED" }
+      }
+    },
+    "PENDING": {
+      "description": "Payment submitted to provider, awaiting authorization.",
+      "transitions": {
+        "authorize": { "to": "AUTHORIZED" },
+        "decline": { "to": "DECLINED", "requires": ["declineCode"] },
+        "fail": { "to": "FAILED" },
+        "void": { "to": "VOIDED" }
+      }
+    },
+    "AUTHORIZED": {
+      "description": "Funds held but not captured.",
+      "transitions": {
+        "capture": { "to": "CAPTURED" },
+        "void": { "to": "VOIDED", "requires": ["reason"] },
+        "expire": { "to": "EXPIRED" }
+      }
+    },
+    "CAPTURED": {
+      "description": "Funds captured. May still be voided before settlement.",
+      "transitions": {
+        "settle": { "to": "SETTLED" },
+        "void": { "to": "VOIDED", "guard": "notSettled" },
+        "refund": { "to": "REFUNDED", "guard": "settled" }
+      }
+    },
+    "SETTLED": {
+      "description": "Funds have moved. Only refund/reversal is possible.",
+      "transitions": {
+        "refund": { "to": "REFUNDED" },
+        "partial_refund": { "to": "SETTLED" }
+      }
+    },
+    "DECLINED": {
+      "description": "Payment was declined by the issuer or processor.",
+      "transitions": {
+        "retry": { "to": "PENDING", "guard": "retryable" },
+        "cancel": { "to": "FAILED" }
+      }
+    }
+  }
+}
