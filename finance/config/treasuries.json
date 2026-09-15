@@ -1,0 +1,30 @@
+{
+  "treasuries": [
+    {
+      "id": "try_general000000",
+      "name": "General Fund",
+      "organizationId": "org_opengrantstack",
+      "currency": "USD",
+      "approvalPolicy": "maker-approver",
+      "quorum": { "m": 2, "n": 3, "signers": ["acc_maintainer1", "acc_maintainer2", "acc_compliance"] },
+      "spendingLimits": [
+        { "threshold": 1000, "quorumM": 1, "quorumN": 1, "requiresRoles": ["maintainer"] },
+        { "threshold": 10000, "quorumM": 2, "quorumN": 3, "requiresRoles": ["maintainer", "compliance_officer"] },
+        { "threshold": 50000, "quorumM": 3, "quorumN": 3, "requiresRoles": ["maintainer", "compliance_officer", "admin"] }
+      ]
+    },
+    {
+      "id": "try_grants0000000",
+      "name": "Grants Treasury",
+      "organizationId": "org_opengrantstack",
+      "currency": "USD",
+      "approvalPolicy": "m-of-n",
+      "quorum": { "m": 2, "n": 4, "signers": ["acc_grants1", "acc_grants2", "acc_grants3", "acc_auditor"] },
+      "spendingLimits": [
+        { "threshold": 5000, "quorumM": 1, "quorumN": 1 },
+        { "threshold": 25000, "quorumM": 2, "quorumN": 4 },
+        { "threshold": 100000, "quorumM": 4, "quorumN": 4 }
+      ]
+    }
+  ]
+}
