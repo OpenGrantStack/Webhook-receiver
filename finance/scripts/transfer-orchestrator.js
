@@ -1,0 +1,149 @@
+import fs from "fs";
+import path from "path";
+import crypto from "crypto";
+import { TransactionEngine } from "./transaction-engine.js";
+import { WalletManager } from "./wallet-manager.js";
+import { TreasuryManager } from "./treasury-manager.js";
+
+export class TransferOrchestrator {
+  constructor(rootDir) {
+    this.rootDir = rootDir;
+    this.storePath = path.join(rootDir, "finance", ".transfers.json");
+    this.transfers = this.load();
+    this.transactions = new TransactionEngine(rootDir);
+    this.wallets = new WalletManager(rootDir);
+    this.treasuries = new TreasuryManager(rootDir);
+    this.quorumConfig = JSON.parse(fs.readFileSync(path.join(rootDir, "finance", "config", "quorums.json"), "utf-8"));
+    this.limits = JSON.parse(fs.readFileSync(path.join(rootDir, "finance", "config", "limits.json"), "utf-8"));
+  }
+
+  load() {
+    try { return JSON.parse(fs.readFileSync(this.storePath, "utf-8")); }
+    catch { return []; }
+  }
+
+  save() {
+    fs.mkdirSync(path.dirname(this.storePath), { recursive: true });
+    fs.writeFileSync(this.storePath, JSON.stringify(this.transfers, null, 2));
+  }
+
+  propose(data) {
+    // Validate limits
+    const limits = this.limits.global;
+    if (data.amount < limits.minTransfer) {
+      return { ok: false, error: "below_minimum", minimum: limits.minTransfer };
+    }
+    if (data.amount > limits.maxSingleTransfer) {
+      return { ok: false, error: "above_maximum", maximum: limits.maxSingleTransfer };
+    }
+
+    const transfer = {
+      id: `trf_${crypto.randomBytes(7).toString("hex")}`,
+      status: "DRAFT",
+      proposedAt: new Date().toISOString(),
+      approvals: [],
+      requiredApprovals: this.resolveRequiredApprovals(data.amount),
+      createdAt: new Date().toISOString(),
+      ...data,
+    };
+
+    transfer.status = "PENDING_APPROVAL";
+    this.transfers.push(transfer);
+    this.save();
+    return { ok: true, transfer };
+  }
+
+  get(id) {
+    return this.transfers.find((t) => t.id === id);
+  }
+
+  list(filters = {}) {
+    let results = [...this.transfers];
+    if (filters.status) results = results.filter((t) => t.status === filters.status);
+    if (filters.fromWalletId) results = results.filter((t) => t.fromWalletId === filters.fromWalletId);
+    if (filters.toWalletId) results = results.filter((t) => t.toWalletId === filters.toWalletId);
+    return results;
+  }
+
+  resolveRequiredApprovals(amount) {
+    const limits = this.limits.global;
+    if (amount >= limits.requireComplianceAbove) return 3;
+    if (amount >= limits.requireDualApprovalAbove) return 2;
+    return 1;
+  }
+
+  approve(id, accountId, signature) {
+    const transfer = this.get(id);
+    if (!transfer) return { ok: false, error: "not_found" };
+    if (transfer.status !== "PENDING_APPROVAL") {
+      return { ok: false, error: "not_awaiting_approval", status: transfer.status };
+    }
+
+    // Separation of duties: proposer cannot approve
+    if (this.quorumConfig.separationOfDuties.proposerCannotApprove && transfer.proposedBy === accountId) {
+      return { ok: false, error: "proposer_cannot_approve" };
+    }
+
+    // Check if already approved
+    if (transfer.approvals.some((a) => a.accountId === accountId)) {
+      return { ok: false, error: "already_approved" };
+    }
+
+    transfer.approvals.push({
+      accountId,
+      approvedAt: new Date().toISOString(),
+      signature: signature || null,
+    });
+
+    if (transfer.approvals.length >= transfer.requiredApprovals) {
+      transfer.status = "APPROVED";
+    }
+
+    this.save();
+    return {
+      ok: true,
+      transfer,
+      approvals: `${transfer.approvals.length}/${transfer.requiredApprovals}`,
+      quorumMet: transfer.status === "APPROVED",
+    };
+  }
+
+  async execute(id) {
+    const transfer = this.get(id);
+    if (!transfer) return { ok: false, error: "not_found" };
+    if (transfer.status !== "APPROVED") {
+      return { ok: false, error: "not_approved", status: transfer.status };
+    }
+
+    // Debit source wallet
+    const debit = this.wallets.debit(transfer.fromWalletId, transfer.amount);
+    if (!debit.ok) return { ok: false, error: "debit_failed", details: debit };
+
+    // Credit destination wallet
+    const credit = this.wallets.credit(transfer.toWalletId, transfer.amount);
+    if (!credit.ok) {
+      // Rollback
+      this.wallets.credit(transfer.fromWalletId, transfer.amount);
+      return { ok: false, error: "credit_failed", details: credit };
+    }
+
+    // Create transaction record
+    const txn = this.transactions.create({
+      type: "transfer",
+      amount: transfer.amount,
+      currency: transfer.currency,
+      fromWalletId: transfer.fromWalletId,
+      toWalletId: transfer.toWalletId,
+      applicationId: transfer.applicationId,
+      milestoneId: transfer.milestoneId,
+      transferId: transfer.id,
+    });
+
+    transfer.status = "SUBMITTED";
+    transfer.executedAt = new Date().toISOString();
+    transfer.transactionId = txn.id;
+
+    this.save();
+    return { ok: true, transfer, transaction: txn };
+  }
+}
