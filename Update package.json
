@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "finance": "node finance/scripts/finance-server.js",
+    "finance:reconcile": "node finance/scripts/reconcile.js"
+  }
+}
