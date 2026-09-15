@@ -1,0 +1,56 @@
+{
+  "id": "milestone-lifecycle",
+  "initial": "PENDING",
+  "terminal": ["PAID", "CANCELLED"],
+  "states": {
+    "PENDING": {
+      "description": "Milestone defined but not started.",
+      "transitions": {
+        "start": { "to": "IN_PROGRESS" },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "IN_PROGRESS": {
+      "description": "Grantee is working on the milestone.",
+      "transitions": {
+        "submit": { "to": "SUBMITTED", "requires": ["proofArtifacts"] },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "SUBMITTED": {
+      "description": "Proof submitted, awaiting review.",
+      "transitions": {
+        "review": { "to": "UNDER_REVIEW" },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "UNDER_REVIEW": {
+      "description": "Reviewers are verifying the proof artifacts.",
+      "transitions": {
+        "approve": { "to": "APPROVED" },
+        "reject": { "to": "REJECTED", "requires": ["rejectionReason"] },
+        "dispute": { "to": "DISPUTED" }
+      }
+    },
+    "REJECTED": {
+      "description": "Proof rejected. Grantee can resubmit.",
+      "transitions": {
+        "resubmit": { "to": "IN_PROGRESS" },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "APPROVED": {
+      "description": "Milestone verified. Awaiting payout.",
+      "transitions": {
+        "pay": { "to": "PAID", "requires": ["transferId"] }
+      }
+    },
+    "DISPUTED": {
+      "description": "Under dispute resolution.",
+      "transitions": {
+        "resolve": { "to": "APPROVED" },
+        "reject": { "to": "REJECTED" }
+      }
+    }
+  }
+}
