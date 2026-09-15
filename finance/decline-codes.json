@@ -1,0 +1,18 @@
+{
+  "codes": [
+    { "code": "insufficient_funds", "category": "soft", "retryable": true, "advice": "retry", "description": "Customer does not have enough available balance." },
+    { "code": "authentication_required", "category": "soft", "retryable": true, "advice": "retry", "description": "Customer must complete 3D Secure or another verification step." },
+    { "code": "processing_error", "category": "processing", "retryable": true, "advice": "retry", "description": "Transient processing failure." },
+    { "code": "invalid_payment_data", "category": "soft", "retryable": false, "advice": "use_alternate_method", "description": "Card number, expiry date, CVV, or other details are incorrect." },
+    { "code": "amount_too_large", "category": "hard", "retryable": false, "advice": "contact_support", "description": "The amount exceeds the maximum allowed." },
+    { "code": "amount_too_small", "category": "hard", "retryable": false, "advice": "contact_support", "description": "The amount is below the minimum allowed." },
+    { "code": "card_testing", "category": "fraud", "retryable": false, "advice": "do_not_retry", "description": "Payment blocked due to suspected card testing behaviour." },
+    { "code": "do_not_honor", "category": "hard", "retryable": false, "advice": "contact_issuer", "description": "Issuer declined without a specific reason." },
+    { "code": "fraud_suspected", "category": "fraud", "retryable": false, "advice": "do_not_retry", "description": "Fraud or risk signal triggered." },
+    { "code": "card_blocked", "category": "hard", "retryable": false, "advice": "use_alternate_method", "description": "The card used is blocked." },
+    { "code": "transaction_not_permitted", "category": "hard", "retryable": false, "advice": "use_alternate_method", "description": "Transaction not permitted for this card." },
+    { "code": "expired_card", "category": "hard", "retryable": false, "advice": "use_alternate_method", "description": "The card has expired." },
+    { "code": "network_error", "category": "network", "retryable": true, "advice": "retry", "description": "Processing network declined for unspecified reason." },
+    { "code": "issuer_unavailable", "category": "network", "retryable": true, "advice": "retry", "description": "Issuer is temporarily unavailable." }
+  ]
+}
