@@ -1,0 +1,38 @@
+{
+  "id": "transfer-lifecycle",
+  "initial": "DRAFT",
+  "terminal": ["CONFIRMED", "FAILED", "CANCELLED", "VOIDED"],
+  "states": {
+    "DRAFT": {
+      "description": "Maker has drafted a transfer.",
+      "transitions": {
+        "propose": { "to": "PENDING_APPROVAL", "requires": ["fromWalletId", "toWalletId", "amount"] },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "PENDING_APPROVAL": {
+      "description": "Awaiting M-of-N approvals from signers.",
+      "transitions": {
+        "approve": { "to": "PENDING_APPROVAL", "guard": "quorumNotMet" },
+        "execute": { "to": "APPROVED", "guard": "quorumMet" },
+        "reject": { "to": "CANCELLED", "requires": ["reason"] },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "APPROVED": {
+      "description": "Quorum met. Ready for submission to rail.",
+      "transitions": {
+        "submit": { "to": "SUBMITTED" },
+        "cancel": { "to": "CANCELLED" }
+      }
+    },
+    "SUBMITTED": {
+      "description": "Submitted to payment rail or chain. Awaiting confirmation.",
+      "transitions": {
+        "confirm": { "to": "CONFIRMED" },
+        "fail": { "to": "FAILED" },
+        "void": { "to": "VOIDED", "guard": "notSettled" }
+      }
+    }
+  }
+}
