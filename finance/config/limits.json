@@ -1,0 +1,23 @@
+{
+  "global": {
+    "maxSingleTransfer": 500000,
+    "maxDailyOutflow": 1000000,
+    "maxMonthlyOutflow": 5000000,
+    "minTransfer": 1,
+    "requireDualApprovalAbove": 10000,
+    "requireComplianceAbove": 50000
+  },
+  "perWallet": {
+    "maxBalance": 2000000,
+    "maxOutflowPerDay": 250000
+  },
+  "perApplication": {
+    "maxAward": 500000,
+    "maxMilestones": 20,
+    "maxEscrowDurationDays": 365
+  },
+  "velocity": {
+    "maxTransfersPerHour": 50,
+    "maxApprovalsPerHour": 100
+  }
+}
