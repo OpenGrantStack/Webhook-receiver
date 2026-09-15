@@ -1,0 +1,106 @@
+#!/usr/bin/env node
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+import { TransactionEngine } from "./transaction-engine.js";
+import { WalletManager } from "./wallet-manager.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, "..", "..");
+
+const transactions = new TransactionEngine(rootDir);
+const wallets = new WalletManager(rootDir);
+
+function reconcile() {
+  const txns = transactions.list();
+  const allWallets = wallets.list();
+
+  const report = {
+    generatedAt: new Date().toISOString(),
+    totals: {
+      transactions: txns.length,
+      wallets: allWallets.length,
+      pending: txns.filter((t) => t.status === "PENDING").length,
+      settled: txns.filter((t) => t.status === "SETTLED").length,
+      declined: txns.filter((t) => t.status === "DECLINED").length,
+      voided: txns.filter((t) => t.status === "VOIDED").length,
+      refunded: txns.filter((t) => ["REFUNDED", "PARTIALLY_REFUNDED"].includes(t.status)).length,
+    },
+    walletBalances: allWallets.map((w) => ({
+      id: w.id,
+      currency: w.currency,
+      ...w.balance,
+    })),
+    discrepancies: [],
+  };
+
+  // Check: wallet balance should equal sum of settled inflows minus outflows
+  for (const wallet of allWallets) {
+    const inflows = txns
+      .filter((t) => t.toWalletId === wallet.id && t.status === "SETTLED")
+      .reduce((sum, t) => sum + t.amount, 0);
+    const outflows = txns
+      .filter((t) => t.fromWalletId === wallet.id && ["SETTLED", "VOIDED", "REFUNDED"].includes(t.status))
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    const expected = inflows - outflows;
+    const actual = wallet.balance.available;
+
+    if (Math.abs(expected - actual) > 0.01) {
+      report.discrepancies.push({
+        walletId: wallet.id,
+        expected,
+        actual,
+        difference: actual - expected,
+      });
+    }
+  }
+
+  // Check: stale pending transactions
+  const staleCutoff = Date.now() - 24 * 60 * 60 * 1000;
+  for (const txn of txns) {
+    if (txn.status === "PENDING" && new Date(txn.createdAt).getTime() < staleCutoff) {
+      report.discrepancies.push({
+        type: "stale_pending",
+        transactionId: txn.id,
+        createdAt: txn.createdAt,
+        ageHours: Math.round((Date.now() - new Date(txn.createdAt).getTime()) / 3600000),
+      });
+    }
+  }
+
+  // Check: transactions with provider refs that were never confirmed
+  for (const txn of txns) {
+    if (txn.providerRef && !txn.confirmedAt && txn.status !== "DECLINED") {
+      report.discrepancies.push({
+        type: "unconfirmed_provider_ref",
+        transactionId: txn.id,
+        providerRef: txn.providerRef,
+      });
+    }
+  }
+
+  return report;
+}
+
+const report = reconcile();
+const outPath = path.join(rootDir, "finance", "reports", `reconcile-${Date.now()}.json`);
+fs.mkdirSync(path.dirname(outPath), { recursive: true });
+fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
+
+console.log(`📊 Reconciliation report`);
+console.log(`   Transactions: ${report.totals.transactions}`);
+console.log(`   Settled:      ${report.totals.settled}`);
+console.log(`   Pending:      ${report.totals.pending}`);
+console.log(`   Declined:     ${report.totals.declined}`);
+console.log(`   Discrepancies: ${report.discrepancies.length}`);
+console.log(`\n✅ Report → ${path.relative(rootDir, outPath)}`);
+
+if (report.discrepancies.length > 0) {
+  console.log(`\n⚠️  ${report.discrepancies.length} discrepancies found:`);
+  for (const d of report.discrepancies.slice(0, 10)) {
+    console.log(`   ${d.type || "balance"}: ${JSON.stringify(d)}`);
+  }
+  process.exit(1);
+}
