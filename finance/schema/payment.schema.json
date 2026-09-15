@@ -1,0 +1,49 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Payment",
+  "type": "object",
+  "required": ["id", "amount", "currency", "status", "method"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^pay_[a-z0-9]{14}$" },
+    "idempotencyKey": { "type": "string" },
+    "orderId": { "type": "string", "description": "Application or goal this payment is for" },
+    "amount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string", "default": "USD" },
+    "status": {
+      "type": "string",
+      "enum": ["CREATED", "PENDING", "AUTHORIZED", "CAPTURED", "SETTLED", "FAILED", "DECLINED", "VOIDED", "REFUNDED", "EXPIRED"]
+    },
+    "method": {
+      "type": "string",
+      "enum": ["card", "bank_transfer", "sepa", "ach", "wire", "crypto", "stablecoin", "cashapp", "paypal", "apple_pay", "google_pay"]
+    },
+    "methodDetails": { "type": "object" },
+    "provider": { "type": "string" },
+    "providerPaymentId": { "type": "string", "description": "Provider's payment ID (e.g. cf_payment_id)" },
+    "providerOrderId": { "type": "string" },
+    "fromAccountId": { "type": "string" },
+    "toWalletId": { "type": "string" },
+    "applicationId": { "type": "string" },
+    "goalId": { "type": "string" },
+    "milestoneId": { "type": "string" },
+    "transactionIds": { "type": "array", "items": { "type": "string" } },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "attemptId": { "type": "string" },
+          "status": { "type": "string" },
+          "declineCode": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" }
+        }
+      }
+    },
+    "decline": { "$ref": "decline.schema.json" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "authorizedAt": { "type": "string", "format": "date-time" },
+    "capturedAt": { "type": "string", "format": "date-time" },
+    "settledAt": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object" }
+  }
+}
