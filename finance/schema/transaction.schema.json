@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Transaction",
+  "type": "object",
+  "required": ["id", "type", "status", "amount", "currency", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^txn_[a-z0-9]{14}$" },
+    "idempotencyKey": { "type": "string", "description": "Client-supplied key for exactly-once processing" },
+    "type": {
+      "type": "string",
+      "enum": [
+        "payment", "transfer", "refund", "void", "reversal",
+        "escrow_deposit", "escrow_release", "escrow_refund",
+        "milestone_payout", "fee", "adjustment", "reconciliation"
+      ]
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING", "AUTHORIZED", "CAPTURED", "SETTLED",
+        "FAILED", "DECLINED", "VOIDED", "REFUNDED", "PARTIALLY_REFUNDED",
+        "CANCELLED", "EXPIRED", "REVERSED"
+      ]
+    },
+    "amount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string", "default": "USD" },
+    "fromWalletId": { "type": "string" },
+    "toWalletId": { "type": "string" },
+    "applicationId": { "type": "string" },
+    "milestoneId": { "type": "string" },
+    "transferId": { "type": "string" },
+    "paymentId": { "type": "string" },
+    "parentTransactionId": { "type": "string", "description": "For refunds/voids, links to original" },
+    "payload": { "type": "object", "description": "Raw provider payload" },
+    "providerRef": { "type": "string", "description": "Provider's transaction ID" },
+    "declineCode": { "type": "string" },
+    "declineReason": { "type": "string" },
+    "confirmations": { "type": "number", "default": 0 },
+    "requiredConfirmations": { "type": "number", "default": 1 },
+    "confirmationsRequired": { "type": "boolean" },
+    "confirmedAt": { "type": "string", "format": "date-time" },
+    "settledAt": { "type": "string", "format": "date-time" },
+    "voidedAt": { "type": "string", "format": "date-time" },
+    "refundedAmount": { "type": "number", "default": 0 },
+    "ledgerEntryId": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" },
+    "metadata": { "type": "object" }
+  }
+}
