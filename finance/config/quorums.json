@@ -1,0 +1,17 @@
+{
+  "roles": {
+    "maker": { "canPropose": true, "canApprove": false, "description": "Drafts transfers. Cannot approve own proposals." },
+    "approver": { "canPropose": true, "canApprove": true, "description": "Reviews and approves transfers." },
+    "auditor": { "canPropose": false, "canApprove": false, "canView": true, "description": "View-only access to treasury activity." },
+    "admin": { "canPropose": true, "canApprove": true, "canManageSigners": true }
+  },
+  "separationOfDuties": {
+    "proposerCannotApprove": true,
+    "approverMustBeDifferentFromProposer": true,
+    "auditorCannotApprove": true
+  },
+  "escalation": {
+    "onTimeout": { "hours": 48, "notify": ["admin", "compliance_officer"] },
+    "onRejection": { "notify": ["proposer"], "allowRePropose": true }
+  }
+}
