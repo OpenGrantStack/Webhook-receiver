@@ -1,0 +1,82 @@
+{
+  "id": "grant-application",
+  "initial": "DRAFT",
+  "terminal": ["DECLINED", "WITHDRAWN", "EXPIRED", "CLOSED"],
+  "states": {
+    "DRAFT": {
+      "description": "Applicant is drafting the application. Only transition is to submit.",
+      "transitions": {
+        "submit": { "to": "SUBMITTED", "requires": ["applicantId"], "guard": "validateRequiredFields" },
+        "withdraw": { "to": "WITHDRAWN" }
+      }
+    },
+    "SUBMITTED": {
+      "description": "Application has been submitted and is awaiting internal screening.",
+      "transitions": {
+        "screen": { "to": "SCREENING", "requires": ["triager"] },
+        "withdraw": { "to": "WITHDRAWN" }
+      }
+    },
+    "SCREENING": {
+      "description": "Internal screening of completeness and eligibility.",
+      "transitions": {
+        "pass": { "to": "ELIGIBILITY_CHECK" },
+        "fail": { "to": "DECLINED", "requires": ["reason"] },
+        "request_info": { "to": "DRAFT", "requires": ["message"] }
+      }
+    },
+    "ELIGIBILITY_CHECK": {
+      "description": "Checking entity types, geography, and program rules.",
+      "transitions": {
+        "eligible": { "to": "UNDER_REVIEW" },
+        "ineligible": { "to": "DECLINED", "requires": ["reason"] }
+      }
+    },
+    "UNDER_REVIEW": {
+      "description": "Review panel is scoring the application.",
+      "transitions": {
+        "advance": { "to": "INTERVIEW", "guard": "minScore" },
+        "approve": { "to": "APPROVED" },
+        "conditional": { "to": "CONDITIONAL_APPROVAL", "requires": ["conditions"] },
+        "decline": { "to": "DECLINED", "requires": ["reason"] }
+      }
+    },
+    "INTERVIEW": {
+      "description": "Interview or deep-dive with the applicant.",
+      "transitions": {
+        "advance": { "to": "DUE_DILIGENCE" },
+        "decline": { "to": "DECLINED" }
+      }
+    },
+    "DUE_DILIGENCE": {
+      "description": "Legal, financial, and compliance review.",
+      "transitions": {
+        "approve": { "to": "APPROVED" },
+        "conditional": { "to": "CONDITIONAL_APPROVAL" },
+        "decline": { "to": "DECLINED" }
+      }
+    },
+    "APPROVED": {
+      "description": "Application approved. Awaiting funding.",
+      "transitions": {
+        "fund": { "to": "FUNDED", "requires": ["treasuryId", "walletId"] },
+        "expire": { "to": "EXPIRED" }
+      }
+    },
+    "CONDITIONAL_APPROVAL": {
+      "description": "Approved subject to conditions.",
+      "transitions": {
+        "satisfy": { "to": "APPROVED" },
+        "fail": { "to": "DECLINED" },
+        "expire": { "to": "EXPIRED" }
+      }
+    },
+    "FUNDED": {
+      "description": "Funds committed to escrow or wallet.",
+      "transitions": {
+        "complete": { "to": "CLOSED" },
+        "cancel": { "to": "DECLINED", "requires": ["reason"] }
+      }
+    }
+  }
+}
