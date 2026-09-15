@@ -1,0 +1,65 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "GrantApplication",
+  "type": "object",
+  "required": ["id", "applicantId", "programId", "state", "createdAt"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^app_[a-z0-9]{14}$" },
+    "applicantId": { "type": "string", "description": "Account ID of the applicant" },
+    "programId": { "type": "string", "description": "Grant program ID from grant-eligibility-merged.json" },
+    "organizationId": { "type": "string", "description": "Granting organization ID" },
+    "state": {
+      "type": "string",
+      "enum": [
+        "DRAFT", "SUBMITTED", "SCREENING", "ELIGIBILITY_CHECK",
+        "UNDER_REVIEW", "INTERVIEW", "DUE_DILIGENCE",
+        "APPROVED", "CONDITIONAL_APPROVAL", "DECLINED",
+        "WITHDRAWN", "EXPIRED", "FUNDED", "CLOSED"
+      ]
+    },
+    "previousState": { "type": "string" },
+    "stateHistory": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to", "at", "actor"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" },
+          "actor": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "requestedAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string", "default": "USD" }
+      }
+    },
+    "awardedAmount": {
+      "type": "object",
+      "properties": {
+        "value": { "type": "number", "minimum": 0 },
+        "currency": { "type": "string" }
+      }
+    },
+    "goals": { "type": "array", "items": { "type": "string" }, "description": "Goal IDs" },
+    "milestones": { "type": "array", "items": { "type": "string" }, "description": "Milestone IDs" },
+    "attachments": { "type": "array", "items": { "type": "string" } },
+    "formResponses": { "type": "object" },
+    "reviewers": { "type": "array", "items": { "type": "string" } },
+    "reviewNotes": { "type": "string" },
+    "score": { "type": "number", "minimum": 0, "maximum": 100 },
+    "treasuryId": { "type": "string" },
+    "escrowId": { "type": "string" },
+    "walletId": { "type": "string" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "decidedAt": { "type": "string", "format": "date-time" },
+    "deadline": { "type": "string", "format": "date" },
+    "metadata": { "type": "object" }
+  }
+}
