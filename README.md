@@ -1,3 +1,192 @@
+
+# OpenGrantStack — Webhook Receiver
+
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.11%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![Status](https://img.shields.io/badge/Status-Active-yellow)](https://github.com/OpenGrantStack)
+[![Progress](https://img.shields.io/badge/Progress-60%25-yellow)](https://github.com/OpenGrantStack)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
+
+**Secure event-ingestion layer for the entire OpenGrantStack ecosystem.**
+
+The Webhook Receiver verifies GitHub webhook signatures, normalizes incoming events, routes them to the correct handlers, and writes audit-ready contribution entries into the OpenGrantStack Ledger.
+
+It is the backbone of contributor analytics, governance automation, and transparent grant reporting.
+
+---
+
+## 📊 Project Status
+
+| Metric              | Value                          |
+|---------------------|--------------------------------|
+| **Progress**        | ████████████░░░░░░░░ **60%**  |
+| **Tier**            | 🟡 Active (50–74)             |
+| **Primary Language**| Python (FastAPI)              |
+| **License**         | Apache 2.0                    |
+
+> Progress is estimated from the OpenGrantStack org scoring rubric (description, LICENSE, README quality, tests, CI, recent activity, releases). Live badges will auto-update once the org scanner is run.
+
+---
+
+## 🚀 Purpose
+
+This repository provides:
+
+- A **FastAPI**-based webhook endpoint for GitHub App events
+- **HMAC SHA-256** signature verification
+- Event normalization and dispatching
+- Modular handler modules for issues, pull requests, pushes, discussions, and more
+- A unified interface for writing contribution entries to the **OpenGrantStack Ledger**
+- Audit-ready logging for governance and compliance
+
+---
+
+## ✨ Features
+
+| Feature                        | Description                                      |
+|--------------------------------|--------------------------------------------------|
+| 🔐 Secure Signature Verification | HMAC SHA-256 validation for every GitHub event  |
+| 🧩 Modular Event Handlers      | Clean handlers per GitHub event type             |
+| 📘 Pydantic Models             | Strict request/response validation               |
+| 🧭 Event Dispatcher            | Routes events to the correct handler             |
+| 📊 Ledger Integration          | Writes normalized contribution records           |
+| 🧪 Test Suite + CI             | Full coverage enforcement via GitHub Actions     |
+| 📚 Unified Docs Pattern        | Matches the OpenGrantStack documentation standard|
+
+---
+
+## 📁 Repository Structure
+
+```
+/
+├── src/
+│   ├── main.py              # FastAPI application entrypoint
+│   ├── config.py            # Configuration & secrets
+│   ├── routers/             # Webhook routes
+│   ├── adapters/            # External service adapters (Ledger, etc.)
+│   ├── services/            # Business logic & dispatchers
+│   ├── models/              # Pydantic models
+│   └── utils/               # Helpers (signature verification, etc.)
+├── tests/                   # Unit + integration tests
+├── docs/                    # Architecture, API, structure docs
+├── .github/workflows/       # CI/CD pipelines
+├── pyproject.toml           # Project metadata & dependencies
+└── README.md
+```
+
+> Detailed architecture lives in `docs/structure.md` (coming soon).
+
+---
+
+## 🛠️ Installation
+
+```bash
+git clone https://github.com/OpenGrantStack/Webhook-receiver.git
+cd Webhook-receiver
+
+# Recommended: use a virtual environment
+python -m venv .venv
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
+pip install -r requirements.txt
+# or (once pyproject.toml is fully set up)
+# pip install -e ".[dev]"
+```
+
+---
+
+## ▶️ Running the Server
+
+```bash
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+The webhook endpoint will be available at:
+
+```
+POST http://localhost:8000/webhooks/github
+```
+
+---
+
+## 🧪 Running Tests
+
+```bash
+pytest --maxfail=1 --disable-warnings -q
+```
+
+With coverage:
+
+```bash
+pytest --cov=src --cov-report=term-missing
+```
+
+---
+
+## 🔌 Integrations
+
+| Service                    | Role                                      |
+|----------------------------|-------------------------------------------|
+| **GitHub App**             | Source of all webhook events              |
+| **OpenGrantStack Ledger**  | Destination for contribution entries      |
+| **OpenGrantStack Hub**     | Surfaces analytics & contributor insights |
+
+---
+
+## 🧭 Governance & Compliance
+
+This repository follows the OpenGrantStack governance model:
+
+- [GOVERNANCE.md](GOVERNANCE.md)
+- [SECURITY.md](SECURITY.md)
+- [CONTRIBUTING.md](CONTRIBUTING.md)
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+
+All contribution activity is designed to be **audit-ready** and fully transparent.
+
+---
+
+## 🗺️ Roadmap
+
+See the unified OpenGrantStack roadmap:
+
+→ [https://github.com/OpenGrantStack/roadmap](https://github.com/OpenGrantStack/roadmap)
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions of all kinds!
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
+
+Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting.
+
+---
+
+## 📄 License
+
+Licensed under the **Apache License 2.0**.
+
+See [LICENSE](LICENSE) for the full text.
+
+---
+
+<div align="center">
+
+**Part of the [OpenGrantStack](https://github.com/OpenGrantStack) ecosystem**  
+*Open infrastructure for transparent, auditable, community-driven grantmaking.*
+
+[Website](https://opengrantstack.publicvm.com) · [Organization](https://github.com/OpenGrantStack) · [Roadmap](https://github.com/OpenGrantStack/roadmap)
+
+</div>
+
+
 OpenGrantStack — Webhook Receiver
 
 The OpenGrantStack Webhook Receiver is the secure event‑ingestion layer for the entire OpenGrantStack ecosystem. It verifies GitHub webhook signatures, normalizes incoming events, routes them to the correct handlers, and writes audit‑ready contribution entries into the OpenGrantStack Ledger.
