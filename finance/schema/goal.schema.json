@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Goal",
+  "type": "object",
+  "required": ["id", "applicationId", "title", "targetAmount", "currency"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^gol_[a-z0-9]{14}$" },
+    "applicationId": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "targetAmount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string", "default": "USD" },
+    "raisedAmount": { "type": "number", "default": 0 },
+    "status": { "type": "string", "enum": ["ACTIVE", "MET", "EXCEEDED", "FAILED", "CANCELLED"] },
+    "deadline": { "type": "string", "format": "date" },
+    "contributors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["accountId", "amount"],
+        "properties": {
+          "accountId": { "type": "string" },
+          "amount": { "type": "number" },
+          "transactionId": { "type": "string" },
+          "refunded": { "type": "boolean", "default": false }
+        }
+      }
+    },
+    "milestones": { "type": "array", "items": { "type": "string" } },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
