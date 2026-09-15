@@ -1,0 +1,18 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Decline",
+  "type": "object",
+  "required": ["id", "transactionId", "code", "category"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^dcl_[a-z0-9]{14}$" },
+    "transactionId": { "type": "string" },
+    "code": { "type": "string" },
+    "category": { "type": "string", "enum": ["soft", "hard", "fraud", "processing", "network"] },
+    "reason": { "type": "string" },
+    "retryable": { "type": "boolean" },
+    "retryAfter": { "type": "string", "format": "date-time" },
+    "providerMessage": { "type": "string" },
+    "advice": { "type": "string", "enum": ["retry", "contact_issuer", "use_alternate_method", "do_not_retry", "contact_support"] },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
