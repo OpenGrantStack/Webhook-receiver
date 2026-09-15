@@ -1,0 +1,46 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Milestone",
+  "type": "object",
+  "required": ["id", "applicationId", "title", "amount", "currency", "status"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^mls_[a-z0-9]{14}$" },
+    "applicationId": { "type": "string" },
+    "goalId": { "type": "string" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "amount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string" },
+    "order": { "type": "number" },
+    "status": {
+      "type": "string",
+      "enum": [
+        "PENDING", "IN_PROGRESS", "SUBMITTED", "UNDER_REVIEW",
+        "APPROVED", "REJECTED", "PAID", "CANCELLED", "DISPUTED"
+      ]
+    },
+    "dueDate": { "type": "string", "format": "date" },
+    "proofArtifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "hash", "submittedAt"],
+        "properties": {
+          "type": { "type": "string", "enum": ["github_release", "pdf_report", "url", "video", "dataset", "commit", "pr"] },
+          "url": { "type": "string", "format": "uri" },
+          "hash": { "type": "string", "description": "SHA-256 of the deliverable" },
+          "submittedAt": { "type": "string", "format": "date-time" },
+          "submittedBy": { "type": "string" }
+        }
+      }
+    },
+    "reviewers": { "type": "array", "items": { "type": "string" } },
+    "reviewNotes": { "type": "string" },
+    "rejectionReason": { "type": "string" },
+    "transferId": { "type": "string", "description": "Transfer that paid this milestone" },
+    "transactionId": { "type": "string" },
+    "approvedAt": { "type": "string", "format": "date-time" },
+    "paidAt": { "type": "string", "format": "date-time" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
