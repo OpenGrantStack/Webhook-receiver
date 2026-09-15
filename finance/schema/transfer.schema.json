@@ -1,0 +1,39 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Transfer",
+  "type": "object",
+  "required": ["id", "fromWalletId", "toWalletId", "amount", "currency", "status"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^trf_[a-z0-9]{14}$" },
+    "fromWalletId": { "type": "string" },
+    "toWalletId": { "type": "string" },
+    "amount": { "type": "number", "minimum": 0 },
+    "currency": { "type": "string" },
+    "status": {
+      "type": "string",
+      "enum": ["DRAFT", "PENDING_APPROVAL", "APPROVED", "SUBMITTED", "CONFIRMED", "FAILED", "CANCELLED", "VOIDED"]
+    },
+    "proposedBy": { "type": "string", "description": "Account ID of the Maker" },
+    "proposedAt": { "type": "string", "format": "date-time" },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["accountId", "approvedAt"],
+        "properties": {
+          "accountId": { "type": "string" },
+          "approvedAt": { "type": "string", "format": "date-time" },
+          "signature": { "type": "string" }
+        }
+      }
+    },
+    "requiredApprovals": { "type": "number" },
+    "executedAt": { "type": "string", "format": "date-time" },
+    "transactionId": { "type": "string" },
+    "applicationId": { "type": "string" },
+    "milestoneId": { "type": "string" },
+    "reason": { "type": "string" },
+    "payload": { "type": "object" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
