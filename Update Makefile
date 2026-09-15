@@ -1,0 +1,8 @@
+# ─── Finance ──────────────────────────────────────────────
+.PHONY: finance
+finance: ## Start the finance server on :9400
+	$(NPM) run finance
+
+.PHONY: reconcile
+reconcile: ## Run reconciliation and check for discrepancies
+	$(NPM) run finance:reconcile
