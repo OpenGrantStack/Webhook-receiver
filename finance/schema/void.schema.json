@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Void",
+  "type": "object",
+  "required": ["id", "originalTransactionId", "type", "status"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^vod_[a-z0-9]{14}$" },
+    "originalTransactionId": { "type": "string" },
+    "originalPaymentId": { "type": "string" },
+    "type": {
+      "type": "string",
+      "enum": ["void", "refund", "reversal", "partial_refund", "chargeback"]
+    },
+    "status": { "type": "string", "enum": ["PENDING", "SUCCEEDED", "FAILED", "REVERSED"] },
+    "amount": { "type": "number", "description": "If null or zero, full amount is voided/refunded" },
+    "currency": { "type": "string" },
+    "reason": { "type": "string" },
+    "voidReason": { "type": "string", "enum": ["USER_CANCEL", "DUPLICATE", "FRAUD", "SYSTEM_ERROR", "MILESTONE_REJECTED", "APPLICATION_DECLINED"] },
+    "requestedBy": { "type": "string" },
+    "approvedBy": { "type": "array", "items": { "type": "string" } },
+    "providerRef": { "type": "string" },
+    "transactionId": { "type": "string", "description": "The new transaction created by this void/refund" },
+    "settledAtOriginal": { "type": "boolean", "description": "Whether the original had settled before reversal" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  }
+}
